@@ -15,7 +15,6 @@ from pandas import concat
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
-from tqdm.notebook import tqdm
 
 kernel_type = '9c_b7_1e_640_ext_15ep'
 image_size = 640

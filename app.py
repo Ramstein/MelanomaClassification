@@ -297,7 +297,7 @@ def transformation():
 
                 image_id = single_df['filepath'][i].rsplit('/', 1)[1]
                 img_url = f"https://{data_bucket}.s3.amazonaws.com/image/{image_id}"
-                diagnosis = round(single_df['pred'][i], 5)
+                diagnosis = str(round(single_df['pred'][i], 5))
                 preds_html.append([img_url, image_id, diagnosis, logits])
                 item = {
                     'invocation_time': {'S': str(invocation_time)},
@@ -307,7 +307,7 @@ def transformation():
                     # 'email': {'S': str(current_user.email)},
                     'img_url': {'S': img_url},
                     'logits': {'S': str(logits)},
-                    'diagnosis': {'S': str(diagnosis)},
+                    'diagnosis': {'S': diagnosis},
                 }
                 ClassificationService.DynamoDBPutItem(item=item)
                 ClassificationService.upload_to_s3_(bucket=data_bucket, channel="image", filepath=image_locs[i])
