@@ -164,11 +164,11 @@ def predict_melanoma(image_locs, model_dir=''):
         valid_loader = torch.utils.data.DataLoader(dataset_valid, batch_size=batch_size, num_workers=num_workers)
 
         model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
-        model = model.to(device)
         model_file = path.join(model_dir, f'{kernel_type}_best_o_fold{fold}.pth')
-        state_dict = torch.load(model_file)
+        state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
         state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
         model.load_state_dict(state_dict, strict=True)
+        model = model.to(device)
         model.eval()
 
         this_LOGITS, this_PROBS = val_epoch(model, valid_loader, n_test=8, get_output=True)

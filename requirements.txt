@@ -4,7 +4,7 @@ resnest==0.0.6b20200823
 geffnet==0.9.8
 numpy==1.19.4
 pandas==0.24.2
-apex==0.1
+git+https://github.com/NVIDIA/apex
 opencv-python==4.2.0.32
 pretrainedmodels
 tqdm
