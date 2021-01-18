@@ -1,16 +1,15 @@
-torch==1.5.0a0+3bbb36e
-albumentations==0.4.6
+torch==1.7.1
+albumentations==0.3.2
 resnest==0.0.6b20200823
 geffnet==0.9.8
-numpy==1.18.1
+numpy==1.19.4
 pandas==0.24.2
 apex==0.1
-opencv_python==4.4.0.42
-pretrainedmodels==0.7.4
-tqdm==4.31.1
-Pillow==7.2.0
-scikit_learn==0.23.2
-kaggle==1.5.6
+opencv-python==4.2.0.32
+pretrainedmodels
+tqdm
+Pillow==6.2.2
+scikit_learn==0.21.3
 -e git+https://github.com/ildoonet/pytorch-gradual-warmup-lr.git#egg=pytorch-gradual-warmup-lr
 requests
 Flask
