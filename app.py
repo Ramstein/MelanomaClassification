@@ -52,7 +52,7 @@ model_dir = '/home/model/melanoma'
 data_bucket = "oncology-melanoma-data-from-radiology"
 data_dir = '/home/endpoint/data/melanoma'
 
-port = 80
+port = 8080
 debug = False
 
 app = Flask(__name__)
