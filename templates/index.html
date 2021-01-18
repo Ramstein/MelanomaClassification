@@ -6,11 +6,11 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Analyse the severity of diabetic retinopathy on a scale of 0 to 4.">
+    <meta name="description" content="Identify melanoma in images of skin lesions.">
     <meta name="author" content="BIONS">
     <link rel="icon" href="https://endpoint-app.s3.amazonaws.com/retinopathy2/bions_logo_512x512.png">
 
-    <title>Diabetic Retinopathy Detection</title>
+    <title>Skin Cancer, Melanoma Prediction</title>
 
     <link rel="canonical" href="index.html">
 
@@ -50,6 +50,10 @@
 	.left_margin{
 	    margin-left:10px
 	}
+
+
+
+
 
 
 
@@ -181,7 +185,7 @@
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
             <div
                     class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                <h5 class="h5">Diabetic Retinopathy</h5>
+                <h5 class="h5">Skin Cancer Classification System for Pigmented Skin Lesions</h5>
                 <div class="btn-toolbar mb-2 mb-md-0">
                     <div class="btn-group mr-2">
                         <button class="btn btn-sm btn-outline-secondary">Share</button>
@@ -196,7 +200,7 @@
             <div class="d-flex justify-content-between">
                 <div>
                     <form class="form-upload" method=post enctype=multipart/form-data>
-                        <h6 class="h6 mb-3 font-weight-normal">Upload images (png, jpg, jpeg, tif, [max=5])</h6>
+                        <h6 class="h6 mb-3 font-weight-normal">Upload images (png, jpg, jpeg, tif, dcm, [max=5])</h6>
                         <div class="form-group">
 
                             <input type="file" id="images" name="files[]" class="form-control" multiple="true"
@@ -227,13 +231,13 @@
 
                 <div>
                     {% if column[0] %}
-                    <div><img class="mb-4 rounded-corners-sample" src={{column[0]}} alt="sample" width="250"
-                              height="188">
+                    <div><img class="mb-4 rounded-corners-sample" src={{column[0]}} alt="sample" width="313"
+                              height="313">
                     </div>
                     {% else %}
                     <div><img class="mb-4 rounded-corners-sample"
                               src="https://oncology-melanoma-data-from-radiology.s3.amazonaws.com/image/ISIC_0015719.jpg"
-                              alt="sample" width="250" height="188">
+                              alt="sample" width="300" height="300">
                     </div>
                     {% endif %}
                 </div>
@@ -246,7 +250,7 @@
                             <th>melanoma probability</th>
                             <th>Prediction</th>
                             <th>Diagnosis</th>
-                            <!--                            <th>Regression</th>-->
+                            <!--                                                        <th>Regression</th>-->
                             <!--                            <th>Ordinal</th>-->
                         </tr>
                         </thead>
@@ -260,34 +264,66 @@
                             <!--                            <td>{{column[5]}}</td>-->
                         </tr>
                         <tr>
-                            <!--                            <td></td>-->
-                            <!--                            <td></td>-->
+                            <td></td>
+                            <td></td>
                             <td>{{column[3][1][0]}}</td>
                             <td>{{column[3][1][1]}}</td>
                             <!--                            <td></td>-->
                             <!--                            <td></td>-->
                         </tr>
                         <tr>
-                            <!--                            <td></td>-->
-                            <!--                            <td></td>-->
+                            <td></td>
+                            <td></td>
                             <td>{{column[3][2][0]}}</td>
                             <td>{{column[3][2][1]}}</td>
                             <!--                            <td></td>-->
                             <!--                            <td></td>-->
                         </tr>
                         <tr>
-                            <!--                            <td></td>-->
-                            <!--                            <td></td>-->
+                            <td></td>
+                            <td></td>
                             <td>{{column[3][3][0]}}</td>
                             <td>{{column[3][3][1]}}</td>
                             <!--                            <td></td>-->
                             <!--                            <td></td>-->
                         </tr>
                         <tr>
-                            <!--                            <td></td>-->
-                            <!--                            <td></td>-->
+                            <td></td>
+                            <td></td>
                             <td>{{column[3][4][0]}}</td>
                             <td>{{column[3][4][1]}}</td>
+                            <!--                            <td></td>-->
+                            <!--                            <td></td>-->
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>{{column[3][5][0]}}</td>
+                            <td>{{column[3][5][1]}}</td>
+                            <!--                            <td></td>-->
+                            <!--                            <td></td>-->
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>{{column[3][6][0]}}</td>
+                            <td>{{column[3][6][1]}}</td>
+                            <!--                            <td></td>-->
+                            <!--                            <td></td>-->
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>{{column[3][7][0]}}</td>
+                            <td>{{column[3][7][1]}}</td>
+                            <!--                            <td></td>-->
+                            <!--                            <td></td>-->
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td>{{column[3][8][0]}}</td>
+                            <td>{{column[3][8][1]}}</td>
                             <!--                            <td></td>-->
                             <!--                            <td></td>-->
                         </tr>
@@ -319,6 +355,10 @@
 
 
 
+
+
+
+
 </script>
 <script src="https://endpoint-app.s3.amazonaws.com/retinopathy2/popper.min.js"></script>
 <script src="https://endpoint-app.s3.amazonaws.com/retinopathy2/bootstrap.min.js"></script>
@@ -327,6 +367,10 @@
 <script src="https://endpoint-app.s3.amazonaws.com/retinopathy2/feather.min.js"></script>
 <script>
 		feather.replace()
+
+
+
+
 
 
 
