@@ -49,6 +49,7 @@ def main():
         df_test = df_test.sample(args.batch_size * 3)
     dataset_test = MelanomaDataset(df_test, 'test', meta_features, transform=transforms_val)
     test_loader = torch.utils.data.DataLoader(dataset_test, batch_size=args.batch_size, num_workers=args.num_workers)
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # load model
     models = []
@@ -67,7 +68,6 @@ def main():
             n_meta_dim=[int(nd) for nd in args.n_meta_dim.split(',')],
             out_dim=args.out_dim
         )
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         model = model.to(device)
 
         try:  # single GPU model_file
@@ -83,27 +83,35 @@ def main():
 
     # predict
     PROBS = []
+    LOGITS = []
     with torch.no_grad():
         for (data) in tqdm(test_loader):
             if args.use_meta:
                 data, meta = data
                 data, meta = data.to(device), meta.to(device)
                 probs = torch.zeros((data.shape[0], args.out_dim)).to(device)
+                logits = torch.zeros((data.shape[0], args.out_dim)).to(device)
                 for model in models:
                     for I in range(args.n_test):
                         l = model(get_trans(data, I), meta)
+                        logits += 1
                         probs += l.softmax(1)
             else:
                 data = data.to(device)
                 probs = torch.zeros((data.shape[0], args.out_dim)).to(device)
+                logits = torch.zeros((data.shape[0], args.out_dim)).to(device)
                 for model in models:
                     for I in range(args.n_test):
                         l = model(get_trans(data, I))
+                        logits += 1
                         probs += l.softmax(1)
             probs /= args.n_test
+            logits /= args.n_test
             probs /= len(models)
+            LOGITS.append(logits.detach().cou())
             PROBS.append(probs.detach().cpu())
     PROBS = torch.cat(PROBS).numpy()
+    LOGITS = torch.cat(LOGITS).numpy()
     # save cvs
     df_test['target'] = PROBS[:, mel_idx]
     df_test[['image_name', 'target']].to_csv(os.path.join(args.sub_dir, f'sub_{args.kernel_type}_{args.eval}.csv'),

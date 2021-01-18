@@ -1,4 +1,5 @@
 import argparse
+import multiprocessing
 import os
 import random
 import time
@@ -27,7 +28,7 @@ def parse_args():
     parser.add_argument('--image-size', type=int, required=True)
     parser.add_argument('--enet-type', type=str, required=True)
     parser.add_argument('--batch-size', type=int, default=64)
-    parser.add_argument('--num-workers', type=int, default=32)
+    parser.add_argument('--num-workers', type=int, default=multiprocessing.cpu_count())
     parser.add_argument('--init-lr', type=float, default=3e-5)
     parser.add_argument('--out-dim', type=int, default=9)
     parser.add_argument('--n-epochs', type=int, default=15)
