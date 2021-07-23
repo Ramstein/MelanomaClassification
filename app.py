@@ -277,7 +277,8 @@ def transformation():
                     image_locs.append(img_path)
                     image.save(img_path)
 
-            dfs_split, LOGITS = predict_melanoma(image_locs, model_dir=model_dir)
+            dfs_split, LOGITS = predict_melanoma(image_locs, model_dir=model_dir,
+                                                 model_list=model_list)
             single_df, LOGITS = ensemble(dfs_split, LOGITS, len=len(image_locs))
 
             print("rendering index.html with predictions and image file,")
@@ -334,7 +335,7 @@ if __name__ == "__main__":
 
     print(len(model_list))
     if model_list is []:
-        Loading_model_in_memory(model_dir=model_dir)
+        model_list = Loading_model_in_memory(model_dir=model_dir)
     print(len(model_list))
 
     print(f'Initialising app on {requests.get("http://ip.42.pl/raw").text}:{port} with dubug={debug}')
