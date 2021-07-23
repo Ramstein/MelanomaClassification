@@ -119,7 +119,6 @@ def get_trans(img, I):
 
 def val_epoch(model, loader, n_test=1, get_output=False):
     """Validation Function"""
-    model.eval()
     LOGITS = []
     PROBS = []
     with torch.no_grad():
@@ -156,20 +155,22 @@ def val_epoch(model, loader, n_test=1, get_output=False):
         return None
 
 
-class loading_model_in_memory(object):
-    model_list = []
+class Loading_model_in_memory:
+    model_list = None
 
-    @classmethod
-    def load(cls, model_dir=''):
+    def __init__(self):
+        self.model_list = []
+
+    def load(self, model_dir=''):
+        model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
         for fold in range(5):
-            model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
             model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
             state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
             state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
             model.load_state_dict(state_dict, strict=True)
             model = model.to(device)
             model.eval()
-            cls.model_list.append(model)
+            self.model_list.append(model)
 
 
 def predict_melanoma(image_locs, model_dir=''):
@@ -183,24 +184,28 @@ def predict_melanoma(image_locs, model_dir=''):
         dataset_valid = SIIMISICDataset(df_val, 'train', mode='test', transform=transforms_val)
         valid_loader = torch.utils.data.DataLoader(dataset_valid, batch_size=batch_size, num_workers=num_workers)
 
-        # model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
-        # model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
-        # state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
-        # state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
-        # model.load_state_dict(state_dict, strict=True)
-        # model = model.to(device)
-        # model.eval()
+        model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
+        model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
+        state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
+        state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
+        model.load_state_dict(state_dict, strict=True)
+        model = model.to(device)
+        model.eval()
+
+        loading_model_in_memory = Loading_model_in_memory()
+
         if loading_model_in_memory.model_list is None:
             loading_model_in_memory.load(model_dir=model_dir)
 
-        this_LOGITS, this_PROBS = val_epoch(loading_model_in_memory.model_list[fold], valid_loader, n_test=8,
+        this_LOGITS, this_PROBS = val_epoch(loading_model_in_memory.model_list[fold],
+                                            valid_loader, n_test=8,
                                             get_output=True)
         PROBS.append(this_PROBS)
         LOGITS.append(this_LOGITS)
         dfs.append(df_val)
 
         dfs = concat(dfs)
-        dfs['pred'] = np.concatenate([PROBS]).squeeze()[:, mel_idx]
+        dfs['pred'] = np.concatenate(PROBS).squeeze()[:, mel_idx]
         dfs_split.append(dfs)
 
     return dfs_split, LOGITS

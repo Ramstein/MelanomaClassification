@@ -27,7 +27,7 @@ from werkzeug.utils import secure_filename
 
 from S3Handler import download_from_s3
 from db import init_db_command
-from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, loading_model_in_memory
+from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, Loading_model_in_memory
 from inference import CLASS_NAMES
 from inference import kernel_type
 from user import User
@@ -329,6 +329,8 @@ if __name__ == "__main__":
             download_from_s3(region=s3_region, bucket=model_bucket,
                              s3_filename='deployment/' + checkpoint_fname,
                              local_path=path.join(model_dir, checkpoint_fname))
+
+    loading_model_in_memory = Loading_model_in_memory()
 
     if loading_model_in_memory.model_list is None:
         loading_model_in_memory.load(model_dir=model_dir)
