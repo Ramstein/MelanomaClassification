@@ -27,7 +27,7 @@ from werkzeug.utils import secure_filename
 
 from S3Handler import download_from_s3
 from db import init_db_command
-from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble
+from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, loading_model_in_memory
 from inference import CLASS_NAMES
 from inference import kernel_type
 from user import User
@@ -43,13 +43,13 @@ GOOGLE_DISCOVERY_URL = (
 )
 
 '''Not Changing variables'''
-s3_region = 'us-east-1'
+s3_region = 'ap-south-1'
 dynamodb_region = 'ap-south-1'
 dynamodb_melanoma_tablename = 'oncology-melanoma'
-model_bucket = 'oncology-melanoma'
+model_bucket = 'oncology-melanoma-ap1'
 model_dir = '/home/model/melanoma'
 
-data_bucket = "oncology-melanoma-data-from-radiology"
+data_bucket = "oncology-melanoma-data-from-radiology-ap1"
 data_dir = '/home/endpoint/data/melanoma'
 
 port = 8080
@@ -92,7 +92,7 @@ def get_google_provider_cfg():
 
 @app.route('/')
 def index():
-    preds_html = [['https://oncology-melanoma-data-from-radiology.s3.amazonaws.com/image/ISIC_0015719.jpg',
+    preds_html = [[f'https://{data_bucket}.s3.amazonaws.com/image/ISIC_0015719.jpg',
                    'ISIC_0015719.jpg', '0.000021', [[9.94348, 'unknown'],
                                                     [4.95314, 'nevus'],
                                                     [-1.11696, 'BKL'],
@@ -323,12 +323,15 @@ if __name__ == "__main__":
     if not path.exists(model_dir):
         makedirs(model_dir, exist_ok=True)
 
-    if not path.isfile(path.join(model_dir, f'{kernel_type}_best_o_fold{0}.pth')):
+    if not path.isfile(path.join(model_dir, f'{kernel_type}_best_fold{0}.pth')):
         for fold in range(5):
-            checkpoint_fname = f'{kernel_type}_best_o_fold{fold}.pth'
+            checkpoint_fname = f'{kernel_type}_best_fold{fold}.pth'
             download_from_s3(region=s3_region, bucket=model_bucket,
                              s3_filename='deployment/' + checkpoint_fname,
                              local_path=path.join(model_dir, checkpoint_fname))
+
+    if loading_model_in_memory.model_list is not None:
+        loading_model_in_memory.load(model_dir=model_dir)
 
     print(f'Initialising app on {requests.get("http://ip.42.pl/raw").text}:{port} with dubug={debug}')
     app.run(host="0.0.0.0", port=port, debug=debug)  # for running on instances

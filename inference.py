@@ -16,10 +16,14 @@ from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 from tqdm import tqdm
 
-kernel_type = '9c_b7_1e_640_ext_15ep'
+# kernel_type = '9c_b7_1e_640_ext_15ep'
+# enet_type = 'efficientnet-b7'
+
+kernel_type = '9c_b6ns_640_ext_15ep'
+enet_type = 'efficientnet-b6'
+
 image_size = 640
 use_amp = False
-enet_type = 'efficientnet-b7'
 batch_size = 32
 num_workers = multiprocessing.cpu_count()
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -152,32 +156,51 @@ def val_epoch(model, loader, n_test=1, get_output=False):
         return None
 
 
+class loading_model_in_memory(object):
+    model_list = []
+
+    @classmethod
+    def load(cls, model_dir=''):
+        for fold in range(5):
+            model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
+            model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
+            state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
+            state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
+            model.load_state_dict(state_dict, strict=True)
+            model = model.to(device)
+            model.eval()
+            cls.model_list.append(model)
+
+
 def predict_melanoma(image_locs, model_dir=''):
     dfs_split = []
     LOGITS = []
     df_val = DataFrame(image_locs, columns=['filepath'])
 
-    for fold in range(5):  # not sampling different data in each fold so just one fold.
+    for i in range(5):  # not sampling different data in each fold so just one fold.
         dfs = []
         dataset_valid = SIIMISICDataset(df_val, 'train', mode='test', transform=transforms_val)
         valid_loader = torch.utils.data.DataLoader(dataset_valid, batch_size=batch_size, num_workers=num_workers)
 
-        model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
-        model_file = path.join(model_dir, f'{kernel_type}_best_o_fold{fold}.pth')
-        state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
-        state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
-        model.load_state_dict(state_dict, strict=True)
-        model = model.to(device)
-        model.eval()
+        # model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
+        # model_file = path.join(model_dloadir, f'{kernel_type}_best_fold{fold}.pth')
+        # state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
+        # state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
+        # model.load_state_dict(state_dict, strict=True)
+        # model = model.to(device)
+        # model.eval()
+        if loading_model_in_memory.model_list is not None:
+            loading_model_in_memory.load(model_dir=model_dir)
+        else:
+            this_LOGITS, this_PROBS = val_epoch(loading_model_in_memory.model_list[i], valid_loader, n_test=8,
+                                                get_output=True)
+            #         PROBS.append(this_PROBS)
+            LOGITS.append(this_LOGITS)
+            dfs.append(df_val)
 
-        this_LOGITS, this_PROBS = val_epoch(model, valid_loader, n_test=8, get_output=True)
-        #         PROBS.append(this_PROBS)
-        LOGITS.append(this_LOGITS)
-        dfs.append(df_val)
-
-        dfs = concat(dfs)
-        dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
-        dfs_split.append(dfs)
+            dfs = concat(dfs)
+            dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
+            dfs_split.append(dfs)
     return dfs_split, LOGITS
 
 
