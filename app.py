@@ -330,8 +330,8 @@ if __name__ == "__main__":
                              s3_filename='deployment/' + checkpoint_fname,
                              local_path=path.join(model_dir, checkpoint_fname))
 
-    # if loading_model_in_memory.model_list is not None:
-    #     loading_model_in_memory.load(model_dir=model_dir)
+    if loading_model_in_memory.model_list is None:
+        loading_model_in_memory.load(model_dir=model_dir)
 
     print(f'Initialising app on {requests.get("http://ip.42.pl/raw").text}:{port} with dubug={debug}')
     app.run(host="0.0.0.0", port=port, debug=debug)  # for running on instances
