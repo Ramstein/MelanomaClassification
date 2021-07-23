@@ -8,18 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Identify melanoma in images of skin lesions.">
     <meta name="author" content="BIONS">
-    <link rel="icon" href="https://endpoint-app.s3.amazonaws.com/retinopathy2/bions_logo_512x512.png">
-
+    <link rel="icon" href="templates/static/img/bions_logo_512x512.png">
     <title>Skin Cancer, Melanoma Prediction</title>
-
     <link rel="canonical" href="index.html">
-
     <!-- Bootstrap core CSS -->
-    <link href="https://endpoint-app.s3.amazonaws.com/retinopathy2/bootstrap.min.css" rel="stylesheet">
-
-
+    <link href="templates/bootstrap-4.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
-    <link href="https://endpoint-app.s3.amazonaws.com/retinopathy2/dashboard.css" rel="stylesheet">
+    <link href="templates/static/css/dashboard.css" rel="stylesheet">
 </head>
 <style>
 	.btn-primary1 {
@@ -68,13 +63,16 @@
 
 
 
+
+
+
+
 </style>
 
 <body>
 <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
     <a class="navbar-brand col-sm-3 col-md-2 mr-0 text-center" href="https://bions.us">
-        <img src="https://endpoint-app.s3.amazonaws.com/retinopathy2/bions_logo_150x34.png" alt="BIONS"
-             width="100" height="20"></a>
+        <img src="templates/static/img/bions_logo_150x34.png" alt="BIONS" width="100" height="20"></a>
     <input class="form-control form-control-dark mr-sm-2 w-100" type="text" placeholder="Search" aria-label="Search">
     <ul class="navbar-nav px-3">
 
@@ -200,7 +198,8 @@
             <div class="d-flex justify-content-between">
                 <div>
                     <form class="form-upload" method=post enctype=multipart/form-data>
-                        <h6 class="h6 mb-3 font-weight-normal">Upload images (png, jpg, jpeg, tif, dcm, [1 < images > 10])</h6>
+                        <h6 class="h6 mb-3 font-weight-normal">Upload images (png, jpg, jpeg, tif, dcm, [1 < images >
+                            10])</h6>
                         <div class="form-group">
 
                             <input type="file" id="images" name="files[]" class="form-control" multiple="true"
@@ -235,8 +234,7 @@
                               height="313">
                     </div>
                     {% else %}
-                    <div><img class="mb-4 rounded-corners-sample"
-                              src="https://oncology-melanoma-data-from-radiology.s3.amazonaws.com/image/ISIC_0015719.jpg"
+                    <div><img class="mb-4 rounded-corners-sample" src="templates/static/img/ISIC_0015719.jpg"
                               alt="sample" width="300" height="300">
                     </div>
                     {% endif %}
@@ -336,7 +334,7 @@
     </div>
 </div>
 
-<script src="code.jquery.com/jquery-3.2.1.slim.min.js"
+<script src="templates/static/js/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
 </script>
 <script>
@@ -359,12 +357,16 @@
 
 
 
+
+
+
+
 </script>
-<script src="https://endpoint-app.s3.amazonaws.com/retinopathy2/popper.min.js"></script>
-<script src="https://endpoint-app.s3.amazonaws.com/retinopathy2/bootstrap.min.js"></script>
+<script src="templates/static/js/popper.min.js"></script>
+<script src="templates/bootstrap-4.0.0/dist/js/bootstrap.min.js"></script>
 
 <!-- Icons -->
-<script src="https://endpoint-app.s3.amazonaws.com/retinopathy2/feather.min.js"></script>
+<script src="templates/static/js/feather.min.js"></script>
 <script>
 		feather.replace()
 
@@ -385,8 +387,12 @@
 
 
 
+
+
+
+
 </script>
 <!-- Graphs -->
-<script src="https://endpoint-app.s3.amazonaws.com/retinopathy2/Chart.min.js"></script>
+<script src="templates/static/js/Chart.min.js"></script>
 </body>
 </html>
