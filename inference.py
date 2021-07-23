@@ -155,25 +155,21 @@ def val_epoch(model, loader, n_test=1, get_output=False):
         return None
 
 
-class Loading_model_in_memory:
-    model_list = []
-
-    # def __init__(self):
-    #     self.model_list = []
-
-    def load(self, model_dir=''):
-        model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
-        for fold in range(5):
-            model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
-            state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
-            state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
-            model.load_state_dict(state_dict, strict=True)
-            model = model.to(device)
-            model.eval()
-            self.model_list.append(model)
+def Loading_model_in_memory(model_dir='', model_list=None):
+    model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
+    for fold in range(5):
+        model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
+        state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
+        state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
+        model.load_state_dict(state_dict, strict=True)
+        model = model.to(device)
+        model.eval()
+        model_list.append(model)
+    return model_list
 
 
-def predict_melanoma(image_locs, model_dir='', models):
+def predict_melanoma(image_locs, model_dir=''):
+
     PROBS = []
     dfs_split = []
     LOGITS = []
@@ -192,7 +188,9 @@ def predict_melanoma(image_locs, model_dir='', models):
         # model = model.to(device)
         # model.eval()
 
-        this_LOGITS, this_PROBS = val_epoch(models[fold],
+        if model_list is None:
+            model_list = Loading_model_in_memory(model_dir=model_dir)
+        this_LOGITS, this_PROBS = val_epoch(model_list[fold],
                                             valid_loader, n_test=8,
                                             get_output=True)
         # PROBS.append(this_PROBS)

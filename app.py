@@ -49,7 +49,7 @@ dynamodb_melanoma_tablename = 'oncology-melanoma'
 model_bucket = 'oncology-melanoma-ap1'
 model_dir = '/home/model/melanoma'
 
-loading_model_in_memory = Loading_model_in_memory()
+model_list = []
 
 data_bucket = "oncology-melanoma-data-from-radiology-ap1"
 data_dir = '/home/endpoint/data/melanoma'
@@ -277,8 +277,7 @@ def transformation():
                     image_locs.append(img_path)
                     image.save(img_path)
 
-            dfs_split, LOGITS = predict_melanoma(image_locs, model_dir=model_dir,
-                                                 models=loading_model_in_memory.model_list)
+            dfs_split, LOGITS = predict_melanoma(image_locs, model_dir=model_dir)
             single_df, LOGITS = ensemble(dfs_split, LOGITS, len=len(image_locs))
 
             print("rendering index.html with predictions and image file,")
@@ -333,10 +332,10 @@ if __name__ == "__main__":
                              s3_filename='deployment/' + checkpoint_fname,
                              local_path=path.join(model_dir, checkpoint_fname))
 
-    print(len(loading_model_in_memory.model_list))
-    if loading_model_in_memory.model_list is None:
-        loading_model_in_memory.load(model_dir=model_dir)
-    print(len(loading_model_in_memory.model_list))
+    print(len(model_list))
+    if model_list is None:
+        model_list = Loading_model_in_memory(model_dir=model_dir)
+    print(len(model_list))
 
     print(f'Initialising app on {requests.get("http://ip.42.pl/raw").text}:{port} with dubug={debug}')
     app.run(host="0.0.0.0", port=port, debug=debug)  # for running on instances
