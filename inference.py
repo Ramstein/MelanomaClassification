@@ -18,6 +18,7 @@ from tqdm import tqdm
 
 # kernel_type = '9c_b7_1e_640_ext_15ep'
 # enet_type = 'efficientnet-b7'
+import app
 
 kernel_type = '9c_b6ns_640_ext_15ep'
 enet_type = 'efficientnet-b6'
@@ -164,12 +165,10 @@ def Loading_model_in_memory(model_dir='', model_list=None):
         model.load_state_dict(state_dict, strict=True)
         model = model.to(device)
         model.eval()
-        model_list.append(model)
-    return model_list
+        app.model_list.append(model)
 
 
-def predict_melanoma(image_locs, model_dir=''):
-
+def predict_melanoma(image_locs, model_dir='', model_list=[]):
     PROBS = []
     dfs_split = []
     LOGITS = []
@@ -188,9 +187,9 @@ def predict_melanoma(image_locs, model_dir=''):
         # model = model.to(device)
         # model.eval()
 
-        if model_list[0] is None:
-            model_list = Loading_model_in_memory(model_dir=model_dir)
-        this_LOGITS, this_PROBS = val_epoch(model_list[fold],
+        if model_list is []:
+            app.model_list = Loading_model_in_memory(model_dir=model_dir)
+        this_LOGITS, this_PROBS = val_epoch(app.model_list[fold],
                                             valid_loader, n_test=8,
                                             get_output=True)
         # PROBS.append(this_PROBS)

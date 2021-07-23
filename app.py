@@ -333,8 +333,8 @@ if __name__ == "__main__":
                              local_path=path.join(model_dir, checkpoint_fname))
 
     print(len(model_list))
-    if model_list[0] is None:
-        model_list = Loading_model_in_memory(model_dir=model_dir)
+    if model_list is []:
+        Loading_model_in_memory(model_dir=model_dir)
     print(len(model_list))
 
     print(f'Initialising app on {requests.get("http://ip.42.pl/raw").text}:{port} with dubug={debug}')
