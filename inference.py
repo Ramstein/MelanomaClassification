@@ -194,8 +194,10 @@ def predict_melanoma(image_locs, model_dir=''):
 
         loading_model_in_memory = Loading_model_in_memory()
 
+        print(len(loading_model_in_memory.model_list))
         if loading_model_in_memory.model_list is None:
             loading_model_in_memory.load(model_dir=model_dir)
+        print(len(loading_model_in_memory.model_list))
 
         this_LOGITS, this_PROBS = val_epoch(loading_model_in_memory.model_list[fold],
                                             valid_loader, n_test=8,
