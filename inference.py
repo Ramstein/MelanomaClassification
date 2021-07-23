@@ -116,37 +116,42 @@ def get_trans(img, I):
         return img.flip(2).flip(3)
 
 
-def val_epoch(model, loader, n_test=1, get_output=False):
+def val_epoch(loader, n_test=1, get_output=False, model_list=None):
     """Validation Function"""
+    if model_list is None:
+        model_list = []
     LOGITS = []
     PROBS = []
     with torch.no_grad():
-        for data in tqdm(loader):
+        for (data) in tqdm(loader):
             if use_meta:
                 data, meta = data
-            #                 data, meta, target = data.to(device), meta.to(device), target.to(device)
-            #                 logits = torch.zeros((data.shape[0], out_dim)).to(device)
-            #                 probs = torch.zeros((data.shape[0], out_dim)).to(device)
-            #                 for I in range(n_test):
-            #                     l = model(get_trans(data, I), meta)
-            #                     logits += l
-            #                     probs += l.softmax(1)
+                # data, meta, target = data.to(device), meta.to(device), target.to(device)
+                # logits = torch.zeros((data.shape[0], out_dim)).to(device)
+                # probs = torch.zeros((data.shape[0], out_dim)).to(device)
+                # for I in range(n_test):
+                #     l = model(get_trans(data, I), meta)
+                #     logits += l
+                #     probs += l.softmax(1)
             else:
                 data = data.to(device)
                 logits = torch.zeros((data.shape[0], out_dim)).to(device)
                 probs = torch.zeros((data.shape[0], out_dim)).to(device)
-                for I in range(n_test):
-                    l = model(get_trans(data, I))
-                    logits += l
-                    probs += l.softmax(1)
+                for model in model_list:
+                    for I in range(n_test):
+                        l = model(get_trans(data, I))
+                        logits += l
+                        probs += l.softmax(1)
             logits /= n_test
             probs /= n_test
+            probs /= len(model_list)
 
             LOGITS.append(logits.detach().cpu())
             PROBS.append(probs.detach().cpu())
 
     LOGITS = torch.cat(LOGITS).numpy()
     PROBS = torch.cat(PROBS).numpy()
+    print(PROBS, LOGITS)
 
     if get_output:
         return LOGITS, PROBS
@@ -154,33 +159,27 @@ def val_epoch(model, loader, n_test=1, get_output=False):
         return None
 
 
-def predict_melanoma(image_locs, model_dir='', model_list=None):
+def predict_melanoma(image_locs, model_list=None):
     PROBS, LOGITS = [], []
     dfs, dfs_split = [], []
     df_val = DataFrame(image_locs, columns=['filepath'])
 
-    for fold in range(5):  # not sampling different data in each fold so just one fold.
-        dataset_valid = SIIMISICDataset(df_val, 'train', mode='test', transform=transforms_val)
-        valid_loader = torch.utils.data.DataLoader(dataset_valid, batch_size=batch_size, num_workers=num_workers)
+    # for fold in range(5):  # not sampling different data in each fold so just one fold.
+    dataset_valid = SIIMISICDataset(df_val, 'train', mode='test', transform=transforms_val)
+    valid_loader = torch.utils.data.DataLoader(dataset_valid, batch_size=batch_size, num_workers=num_workers)
 
-        # model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
-        # model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
-        # state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
-        # state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
-        # model.load_state_dict(state_dict, strict=True)
-        # model = model.to(device)
-        # model.eval()
+    this_LOGITS, this_PROBS = val_epoch(valid_loader, n_test=8, get_output=True, model_list=model_list)
+    # PROBS.append(this_PROBS)
+    LOGITS.append(this_LOGITS)
+    dfs.append(df_val)
 
-        this_LOGITS, this_PROBS = val_epoch(model_list[fold], valid_loader, n_test=8, get_output=True)
-        # PROBS.append(this_PROBS)
-        LOGITS.append(this_LOGITS)
-        dfs.append(df_val)
+    dfs = concat(dfs)
+    print('dfs', dfs)
+    # dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
+    dfs['pred'] = this_PROBS.squeeze()[:, mel_idx]
+    print('dfs', dfs)
 
-        dfs = concat(dfs)
-        dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
-        dfs_split.append(dfs)
-
-    return dfs_split, LOGITS
+    return dfs, LOGITS
 
 
 def ensemble(dfs_split, LOGITS, len=0):
