@@ -173,6 +173,7 @@ class loading_model_in_memory(object):
 
 
 def predict_melanoma(image_locs, model_dir=''):
+    PROBS = []
     dfs_split = []
     LOGITS = []
     df_val = DataFrame(image_locs, columns=['filepath'])
@@ -192,15 +193,15 @@ def predict_melanoma(image_locs, model_dir=''):
         # if loading_model_in_memory.model_list is not None:
         #     loading_model_in_memory.load(model_dir=model_dir)
         # else:
-        this_LOGITS, this_PROBS = val_epoch(loading_model_in_memory.model_list[fold], valid_loader, n_test=8,
+        this_LOGITS, this_PROBS = val_epoch(model, valid_loader, n_test=8,
                                             get_output=True)
-        # PROBS.append(this_PROBS)
+        PROBS.append(this_PROBS)
         LOGITS.append(this_LOGITS)
         dfs.append(df_val)
 
-        dfs = concat(dfs)
-        dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
-        dfs_split.append(dfs)
+    dfs = concat(dfs)
+    dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
+    dfs_split.append(dfs)
 
     return dfs_split, LOGITS
 
