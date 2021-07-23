@@ -176,10 +176,10 @@ def predict_melanoma(image_locs, model_dir=''):
     PROBS = []
     dfs_split = []
     LOGITS = []
+    dfs = []
     df_val = DataFrame(image_locs, columns=['filepath'])
 
     for fold in range(5):  # not sampling different data in each fold so just one fold.
-        dfs = []
         dataset_valid = SIIMISICDataset(df_val, 'train', mode='test', transform=transforms_val)
         valid_loader = torch.utils.data.DataLoader(dataset_valid, batch_size=batch_size, num_workers=num_workers)
 
@@ -200,7 +200,7 @@ def predict_melanoma(image_locs, model_dir=''):
         dfs.append(df_val)
 
     dfs = concat(dfs)
-    dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
+    dfs['pred'] = np.concatenate([PROBS]).squeeze()[:, mel_idx]
     dfs_split.append(dfs)
 
     return dfs_split, LOGITS
