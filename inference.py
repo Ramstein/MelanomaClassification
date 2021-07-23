@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import multiprocessing
-from os import path
 
 import albumentations as A
 import numpy as np
@@ -155,25 +154,9 @@ def val_epoch(model, loader, n_test=1, get_output=False):
         return None
 
 
-def Loading_model_in_memory(model_dir='', model_list=None):
-    model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
-    for fold in range(5):
-        model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
-        state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
-        state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
-        model.load_state_dict(state_dict, strict=True)
-        model = model.to(device)
-        model.eval()
-        model_list.append(model)
-    return model_list
-
 def predict_melanoma(image_locs, model_dir='', model_list=None):
-    if model_list is None:
-        model_list = []
-    PROBS = []
-    dfs_split = []
-    LOGITS = []
-    dfs = []
+    PROBS, LOGITS = [], []
+    dfs, dfs_split = [], []
     df_val = DataFrame(image_locs, columns=['filepath'])
 
     for fold in range(5):  # not sampling different data in each fold so just one fold.
@@ -188,11 +171,7 @@ def predict_melanoma(image_locs, model_dir='', model_list=None):
         # model = model.to(device)
         # model.eval()
 
-        if model_list is []:
-            model_list = Loading_model_in_memory(model_dir=model_dir)
-        this_LOGITS, this_PROBS = val_epoch(model_list[fold],
-                                            valid_loader, n_test=8,
-                                            get_output=True)
+        this_LOGITS, this_PROBS = val_epoch(model_list[fold], valid_loader, n_test=8, get_output=True)
         # PROBS.append(this_PROBS)
         LOGITS.append(this_LOGITS)
         dfs.append(df_val)

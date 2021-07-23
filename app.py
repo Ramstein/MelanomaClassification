@@ -12,6 +12,7 @@ from shutil import disk_usage
 
 import boto3
 import requests
+import torch
 import werkzeug
 from flask import Flask, redirect, request, url_for
 from flask import render_template
@@ -27,7 +28,8 @@ from werkzeug.utils import secure_filename
 
 from S3Handler import download_from_s3
 from db import init_db_command
-from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, Loading_model_in_memory
+from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, Loading_model_in_memory, enet_type, enetv2, \
+    device, out_dim
 from inference import CLASS_NAMES
 from inference import kernel_type
 from user import User
@@ -260,6 +262,20 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def Loading_model_in_memory(model_dir=''):
+    model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
+    for fold in range(5):
+        print(f"Loading Model f'{kernel_type}_best_fold{fold}.pth'")
+        model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
+        state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
+        state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
+        model.load_state_dict(state_dict, strict=True)
+        model = model.to(device)
+        model.eval()
+        model_list.append(model)
+    return model_list
+
+
 @app.route('/', methods=['POST'])
 def transformation():
     gc.collect()  # try to free some memory.
@@ -276,6 +292,11 @@ def transformation():
                     img_path = os.path.join(data_dir, secure_filename(image.filename))
                     image_locs.append(img_path)
                     image.save(img_path)
+
+            print(len(model_list))
+            if model_list is [] or model_list is None:
+                Loading_model_in_memory(model_dir=model_dir)
+            print(len(model_list))
 
             dfs_split, LOGITS = predict_melanoma(image_locs, model_dir=model_dir,
                                                  model_list=model_list)
@@ -334,7 +355,7 @@ if __name__ == "__main__":
                              local_path=path.join(model_dir, checkpoint_fname))
 
     print(len(model_list))
-    if model_list is []:
+    if model_list is [] or model_list is None:
         model_list = Loading_model_in_memory(model_dir=model_dir)
     print(len(model_list))
 
