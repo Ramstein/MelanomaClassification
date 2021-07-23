@@ -264,7 +264,7 @@ def allowed_file(filename):
 def Loading_model_in_memory(model_dir=''):
     model = enetv2(enet_type, n_meta_features=0, out_dim=out_dim)
     for fold in range(5):
-        print(f"Loading Model f'{kernel_type}_best_fold{fold}.pth'")
+        print(f"Loading Model {kernel_type}_best_fold{fold}.pth")
         model_file = path.join(model_dir, f'{kernel_type}_best_fold{fold}.pth')
         state_dict = torch.load(model_file, map_location=lambda storage, loc: storage)
         state_dict = {k.replace('module.', ''): state_dict[k] for k in state_dict.keys()}
@@ -295,8 +295,7 @@ def transformation():
             if model_list is None:
                 Loading_model_in_memory(model_dir=model_dir)
 
-            dfs_split, LOGITS = predict_melanoma(image_locs, model_dir=model_dir,
-                                                 model_list=model_list)
+            dfs_split, LOGITS = predict_melanoma(image_locs, model_list=model_list)
             single_df, LOGITS = ensemble(dfs_split, LOGITS, len=len(image_locs))
 
             print("rendering index.html with predictions and image file,")

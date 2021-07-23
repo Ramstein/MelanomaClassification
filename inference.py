@@ -170,16 +170,16 @@ def predict_melanoma(image_locs, model_list=None):
 
     this_LOGITS, this_PROBS = val_epoch(valid_loader, n_test=8, get_output=True, model_list=model_list)
     # PROBS.append(this_PROBS)
-    LOGITS.append(this_LOGITS)
+    # LOGITS.append(this_LOGITS)
     dfs.append(df_val)
 
     dfs = concat(dfs)
     print('dfs', dfs)
     # dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
-    dfs['pred'] = this_PROBS.squeeze()[:, mel_idx]
+    dfs['pred'] = this_PROBS[:, mel_idx]
     print('dfs', dfs)
 
-    return dfs, LOGITS
+    return dfs, this_LOGITS
 
 
 def ensemble(dfs_split, LOGITS, len=0):
