@@ -188,7 +188,7 @@ def predict_melanoma(image_locs, model_dir=''):
         # model = model.to(device)
         # model.eval()
 
-        if model_list is None:
+        if model_list[0] is None:
             model_list = Loading_model_in_memory(model_dir=model_dir)
         this_LOGITS, this_PROBS = val_epoch(model_list[fold],
                                             valid_loader, n_test=8,
