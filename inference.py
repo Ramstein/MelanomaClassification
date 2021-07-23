@@ -177,7 +177,7 @@ def predict_melanoma(image_locs, model_dir='', model_list=None):
         dfs.append(df_val)
 
         dfs = concat(dfs)
-        dfs['pred'] = np.concatenate(this_PROBS).squeeze()[:, mel_idx]
+        dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
         dfs_split.append(dfs)
 
     return dfs_split, LOGITS

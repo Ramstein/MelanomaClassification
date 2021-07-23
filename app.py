@@ -292,10 +292,8 @@ def transformation():
                     image_locs.append(img_path)
                     image.save(img_path)
 
-            print(len(model_list))
             if model_list is None:
                 Loading_model_in_memory(model_dir=model_dir)
-            print(len(model_list))
 
             dfs_split, LOGITS = predict_melanoma(image_locs, model_dir=model_dir,
                                                  model_list=model_list)
@@ -353,9 +351,7 @@ if __name__ == "__main__":
                              s3_filename='deployment/' + checkpoint_fname,
                              local_path=path.join(model_dir, checkpoint_fname))
 
-    print(len(model_list))
     model_list = Loading_model_in_memory(model_dir=model_dir)
-    print(len(model_list))
 
     print(f'Initialising app on {requests.get("http://ip.42.pl/raw").text}:{port} with dubug={debug}')
     app.run(host="0.0.0.0", port=port, debug=debug)  # for running on instances
