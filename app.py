@@ -28,8 +28,7 @@ from werkzeug.utils import secure_filename
 
 from S3Handler import download_from_s3
 from db import init_db_command
-from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, Loading_model_in_memory, enet_type, enetv2, \
-    device, out_dim
+from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, enet_type, enetv2, device, out_dim
 from inference import CLASS_NAMES
 from inference import kernel_type
 from user import User
@@ -294,7 +293,7 @@ def transformation():
                     image.save(img_path)
 
             print(len(model_list))
-            if model_list is [] or model_list is None:
+            if model_list is None:
                 Loading_model_in_memory(model_dir=model_dir)
             print(len(model_list))
 
@@ -355,8 +354,7 @@ if __name__ == "__main__":
                              local_path=path.join(model_dir, checkpoint_fname))
 
     print(len(model_list))
-    if model_list is [] or model_list is None:
-        model_list = Loading_model_in_memory(model_dir=model_dir)
+    model_list = Loading_model_in_memory(model_dir=model_dir)
     print(len(model_list))
 
     print(f'Initialising app on {requests.get("http://ip.42.pl/raw").text}:{port} with dubug={debug}')
