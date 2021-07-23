@@ -10,7 +10,8 @@ pretrainedmodels
 tqdm
 Pillow==6.2.2
 scikit_learn==0.21.3
--e git+https://github.com/ildoonet/pytorch-gradual-warmup-lr.git#egg=pytorch-gradual-warmup-lr
+git+https://github.com/ildoonet/pytorch-gradual-warmup-lr.git
+#-e git+https://github.com/ildoonet/pytorch-gradual-warmup-lr.git#egg=pytorch-gradual-warmup-lr
 requests
 Flask
 oauthlib
