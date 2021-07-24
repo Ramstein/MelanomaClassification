@@ -96,15 +96,15 @@ def get_google_provider_cfg():
 @app.route('/')
 def index():
     preds_html = [['https://endpoint-app-ap1.s3.ap-south-1.amazonaws.com/webapp/static/img/ISIC_0015719.jpg',
-                   'ISIC_0015719.jpg', '0.000021', [[9.94348, 'unknown'],
-                                                    [4.95314, 'nevus'],
-                                                    [-1.11696, 'BKL'],
-                                                    [-4.33019, 'melanoma'],
-                                                    [-4.36317, 'DF'],
-                                                    [-4.48071, 'VASC'],
-                                                    [-7.16753, 'SCC'],
-                                                    [-7.73477, 'AK'],
-                                                    [-8.36905, 'BCC']]
+                   'ISIC_0015719.jpg', [[9.94348, 'unknown'],
+                                        [4.95314, 'nevus'],
+                                        [-1.11696, 'BKL'],
+                                        [-4.33019, 'melanoma'],
+                                        [-4.36317, 'DF'],
+                                        [-4.48071, 'VASC'],
+                                        [-7.16753, 'SCC'],
+                                        [-7.73477, 'AK'],
+                                        [-8.36905, 'BCC']]
                    ]]
     if current_user.is_authenticated:
         return render_template("index.html", user_authenticated=True,
