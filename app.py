@@ -317,6 +317,7 @@ def transformation():
                         if probs[j_][0] < probs[j_ + 1][0]:
                             probs[j_], probs[j_ + 1] = probs[j_ + 1], probs[j_]
 
+                print(probs)
                 image_id = dfs_split['filepath'][i].rsplit('/', 1)[1]
                 img_url = f"https://{data_bucket}.s3.amazonaws.com/image/{image_id}"
                 preds_html.append([img_url, image_id, probs])
