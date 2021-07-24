@@ -151,8 +151,6 @@ def val_epoch(loader, n_test=1, get_output=False, model_list=None):
 
     LOGITS = torch.cat(LOGITS).numpy()
     PROBS = torch.cat(PROBS).numpy()
-    print(PROBS, LOGITS)
-
     if get_output:
         return LOGITS, PROBS
     else:
@@ -175,11 +173,11 @@ def predict_melanoma(image_locs, model_list=None):
 
     dfs = concat(dfs)
     # dfs['pred'] = np.concatenate([this_PROBS]).squeeze()[:, mel_idx]
-    dfs['pred'] = this_PROBS
-    dfs['logits'] = this_LOGITS
-    print('dfs', dfs)
+    # dfs['pred'] = this_PROBS
+    # dfs['logits'] = this_LOGITS
+    # print('dfs', dfs)
 
-    return dfs, this_LOGITS
+    return dfs, this_PROBS, this_LOGITS
 
 
 def ensemble(dfs_split, LOGITS, len=0):

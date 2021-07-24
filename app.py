@@ -28,7 +28,7 @@ from werkzeug.utils import secure_filename
 
 from S3Handler import download_from_s3
 from db import init_db_command
-from inference import ALLOWED_EXTENSIONS, predict_melanoma, ensemble, enet_type, enetv2, device, out_dim
+from inference import ALLOWED_EXTENSIONS, predict_melanoma, enet_type, enetv2, device, out_dim
 from inference import CLASS_NAMES
 from inference import kernel_type
 from user import User
@@ -295,28 +295,74 @@ def transformation():
             if model_list is None:
                 Loading_model_in_memory(model_dir=model_dir)
 
-            dfs_split, LOGITS = predict_melanoma(image_locs, model_list=model_list)
-            single_df, LOGITS = ensemble(dfs_split, LOGITS, len=len(image_locs))
+            dfs_split, PROBS, LOGITS = predict_melanoma(image_locs, model_list=model_list)
+
+            # [[2.55993285e-07 3.70259755e-07 1.58978344e-06 5.99362806e-07
+            #   2.24804509e-07 7.07100980e-07 7.22086334e-05 9.99855161e-01
+            #   6.89909793e-05]
+            #  [3.41495110e-07 4.93325206e-06 1.20096665e-05 1.72955595e-07
+            #  1.86365284e-07 1.23693781e-05 2.46703699e-02 1.59024785e-04
+            #  9.75140572e-01]] [[-26.85477 - 24.823887 - 17.240356 - 21.16139 - 27.319925
+            #                     - 21.92301      0.72298104  50.634743 - 14.968703]
+            #                    [-32.729427 - 20.577925 - 14.994341 - 36.165672 - 38.961273
+            #                     - 14.003207    20.675333 - 1.1629266   44.37256]]
+
+            # single_df, LOGITS = ensemble(dfs_split, LOGITS, len=len(image_locs))
 
             print("rendering index.html with predictions and image file,")
             preds_html = []
             invocation_time = datetime.now(tz=timezone.utc).strftime('%y-%m-%d %H:%M:%S')
 
-            for i, log in enumerate(LOGITS):
-                logits = []
-                for j, log_ in enumerate(log):
-                    logits.append([round(log_, 5), CLASS_NAMES[j]])
+            # for i, log in enumerate(LOGITS):
+            #     logits = []
+            #     for j, log_ in enumerate(log):
+            #         logits.append([round(log_, 5), CLASS_NAMES[j]])
+            #
+            #     # sorting the logits in descending
+            #     for j in range(0, len(CLASS_NAMES)):
+            #         for j_ in range(0, len(CLASS_NAMES) - j - 1):
+            #             if logits[j_][0] < logits[j_ + 1][0]:
+            #                 logits[j_], logits[j_ + 1] = logits[j_ + 1], logits[j_]
+            #
+            #     image_id = single_df['filepath'][i].rsplit('/', 1)[1]
+            #     img_url = f"https://{data_bucket}.s3.amazonaws.com/image/{image_id}"
+            #     diagnosis = format(single_df['pred'][i], '.5f')
+            #     preds_html.append([img_url, image_id, diagnosis, logits])
+            #     item = {
+            #         'invocation_time': {'S': str(invocation_time)},
+            #         'image_id': {'S': image_id},
+            #         # 'user_id': {'S': str(current_user.id)},
+            #         # 'name': {'S': str(current_user.name)},
+            #         # 'email': {'S': str(current_user.email)},
+            #         'img_url': {'S': img_url},
+            #         'logits': {'S': str(logits)},
+            #         'diagnosis': {'S': str(diagnosis)},
+            #     }
+            #     ClassificationService.DynamoDBPutItem(item=item)
+            #     ClassificationService.upload_to_s3_(bucket=data_bucket, channel="image", filepath=image_locs[i])
+            #
+            # gc.collect()
+            # return render_template("index.html", user_authenticated=False,
+            #                        preds_html=preds_html, current_user=current_user)
 
-                # sorting the logits in descending
+            for i, prob in enumerate(PROBS):
+                probs = []
+                for j, prob_ in enumerate(prob):
+                    probs.append([round(prob_, 5), CLASS_NAMES[j]])
+
+                # sorting the probs in descending
                 for j in range(0, len(CLASS_NAMES)):
                     for j_ in range(0, len(CLASS_NAMES) - j - 1):
-                        if logits[j_][0] < logits[j_ + 1][0]:
-                            logits[j_], logits[j_ + 1] = logits[j_ + 1], logits[j_]
+                        if probs[j_][0] < probs[j_ + 1][0]:
+                            probs[j_], probs[j_ + 1] = probs[j_ + 1], probs[j_]
 
-                image_id = single_df['filepath'][i].rsplit('/', 1)[1]
+                print(probs)
+                print(dfs_split)
+                image_id = dfs_split['filepath'][i].rsplit('/', 1)[1]
                 img_url = f"https://{data_bucket}.s3.amazonaws.com/image/{image_id}"
-                diagnosis = format(single_df['pred'][i], '.5f')
-                preds_html.append([img_url, image_id, diagnosis, logits])
+                # diagnosis = format(dfs_split['pred'][i], '.5f')
+                diagnosis = "null"
+                preds_html.append([img_url, image_id, diagnosis, probs])
                 item = {
                     'invocation_time': {'S': str(invocation_time)},
                     'image_id': {'S': image_id},
@@ -324,7 +370,7 @@ def transformation():
                     # 'name': {'S': str(current_user.name)},
                     # 'email': {'S': str(current_user.email)},
                     'img_url': {'S': img_url},
-                    'logits': {'S': str(logits)},
+                    'logits': {'S': str(probs)},
                     'diagnosis': {'S': str(diagnosis)},
                 }
                 ClassificationService.DynamoDBPutItem(item=item)
