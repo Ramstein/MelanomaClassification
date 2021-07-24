@@ -329,11 +329,9 @@ def transformation():
                 }
                 ClassificationService.DynamoDBPutItem(item=item)
                 ClassificationService.upload_to_s3_(bucket=data_bucket, channel="image", filepath=image_locs[i])
-                return render_template("index.html", user_authenticated=False,
-                                       preds_html=preds_html, current_user=current_user)
             gc.collect()
-            # return render_template("index.html", user_authenticated=False,
-            #                        preds_html=preds_html, current_user=current_user)
+            return render_template("index.html", user_authenticated=False,
+                                   preds_html=preds_html, current_user=current_user)
     return redirect(url_for("index"))
 
 
