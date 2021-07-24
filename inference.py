@@ -158,17 +158,13 @@ def val_epoch(loader, n_test=1, get_output=False, model_list=None):
 
 
 def predict_melanoma(image_locs, model_list=None):
-    PROBS, LOGITS = [], []
     dfs, dfs_split = [], []
     df_val = DataFrame(image_locs, columns=['filepath'])
 
-    # for fold in range(5):  # not sampling different data in each fold so just one fold.
     dataset_valid = SIIMISICDataset(df_val, 'train', mode='test', transform=transforms_val)
     valid_loader = torch.utils.data.DataLoader(dataset_valid, batch_size=batch_size, num_workers=num_workers)
 
     this_LOGITS, this_PROBS = val_epoch(valid_loader, n_test=8, get_output=True, model_list=model_list)
-    # PROBS.append(this_PROBS)
-    # LOGITS.append(this_LOGITS)
     dfs.append(df_val)
 
     dfs = concat(dfs)
@@ -176,7 +172,6 @@ def predict_melanoma(image_locs, model_list=None):
     # dfs['pred'] = this_PROBS
     # dfs['logits'] = this_LOGITS
     # print('dfs', dfs)
-
     return dfs, this_PROBS, this_LOGITS
 
 
