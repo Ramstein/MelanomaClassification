@@ -13,6 +13,7 @@ from pandas import DataFrame
 from pandas import concat
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
+from tqdm import tqdm
 
 # kernel_type = '9c_b7_1e_640_ext_15ep'
 # enet_type = 'efficientnet-b7'
@@ -122,7 +123,7 @@ def val_epoch(loader, n_test=1, get_output=False, model_list=None):
     LOGITS = []
     PROBS = []
     with torch.no_grad():
-        for (data) in loader:
+        for (data) in tqdm(loader):
             if use_meta:
                 data, meta = data
                 # data, meta, target = data.to(device), meta.to(device), target.to(device)
